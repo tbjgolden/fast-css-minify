@@ -2,7 +2,6 @@ import {
   toTokens,
   // ---
   Token,
-  WhitespaceToken,
   CommaToken,
   LeftParenToken,
   RightParenToken,
@@ -27,7 +26,6 @@ type StaticToken =
   | ColonToken
   | SemicolonToken
   | CommaToken
-  | WhitespaceToken
   | CDOToken
   | CDCToken
   | EOFToken
@@ -42,7 +40,6 @@ const STATIC_TOKEN_MAP: Record<string, string | undefined> = {
   '<colon-token>': ':',
   '<comma-token>': ',',
   '<semicolon-token>': ';',
-  '<whitespace-token>': ' ',
   '<CDO-token>': '<!--',
   '<CDC-token>': '-->',
   '<EOF-token>': ''
@@ -54,17 +51,51 @@ function isStaticToken(token: Token): token is StaticToken {
 
 export const toMinifiedString = (tokens: Token[]): string => {
   let minifiedString = ''
-  for (const token of tokens) {
+  let calcNest = 0
+  let isPendingAtRule = false
+  let lastToken: Token = {
+    type: '<EOF-token>'
+  }
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
     if (isStaticToken(token)) {
       minifiedString += STATIC_TOKEN_MAP[token.type]
+      if (isPendingAtRule) {
+        if (token.type === '<semicolon-token>') {
+          isPendingAtRule = false
+        } else if (token.type === '<{-token>') {
+          minifiedString += '\n'
+          isPendingAtRule = false
+        }
+      }
+      if (calcNest > 0) {
+        if (token.type === '<(-token>') {
+          calcNest += 1
+        } else if (token.type === '<)-token>') {
+          calcNest -= 1
+        }
+      }
+    } else if (token.type === '<whitespace-token>') {
+      if (calcNest < 1) {
+        if (isStaticToken(lastToken)) continue
+        if (i + 1 < tokens.length) {
+          const nextToken = tokens[i + 1]
+          if (isStaticToken(nextToken)) continue
+        }
+      }
+      minifiedString += ' '
     } else if (token.type === '<at-keyword-token>') {
       minifiedString += '@' + token.value
+      isPendingAtRule = true
     } else if (token.type === '<delim-token>') {
       minifiedString += String.fromCharCode(token.value)
     } else if (token.type === '<dimension-token>') {
       minifiedString += token.value + token.unit
     } else if (token.type === '<function-token>') {
       minifiedString += token.value + '('
+      if (token.value === 'calc') {
+        calcNest = 1
+      }
     } else if (token.type === '<hash-token>') {
       minifiedString += '#' + token.value
     } else if (token.type === '<ident-token>') {
@@ -78,6 +109,7 @@ export const toMinifiedString = (tokens: Token[]): string => {
     } else {
       minifiedString += token.raw
     }
+    lastToken = token
   }
   return minifiedString
 }

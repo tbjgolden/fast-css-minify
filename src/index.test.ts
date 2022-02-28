@@ -11,6 +11,10 @@ const boarCSS = fs.readFileSync(
   path.join(__dirname, '__fixtures__', 'boar.css'),
   'utf8'
 )
+const edgeCaseCSS = fs.readFileSync(
+  path.join(__dirname, '__fixtures__', 'edgecase.css'),
+  'utf8'
+)
 
 test('benchmark', () => {
   const simpleStart = Date.now()
@@ -62,4 +66,8 @@ test('minify is stable', () => {
   const onePass = minify(boarCSS)
   const twoPass = minify(onePass)
   expect(onePass).toBe(twoPass)
+})
+
+test('minify parses edge cases', () => {
+  expect(() => minify(edgeCaseCSS)).not.toThrow()
 })

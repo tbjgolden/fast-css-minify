@@ -1,0 +1,233 @@
+:root {
+  --zero-size: {
+    width: 0;
+    height: 0;
+  };
+  --small-icon: {
+    width: 16px;
+    height: 16px;
+  }
+  ;
+}
+@supports (--element(".minwidth", { "minWidth": 300 })) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+
+@supports ({"example": 1}) {
+  * { background: red; }
+}
+
+@supports (("example": 1)) {
+  * { background: red; }
+}
+
+@supports (func("example": 1)) {
+  * { background: red; }
+}
+
+@supports (--var) {
+  * { background: red; }
+}
+
+@supports ([]) {
+  * { background: red; }
+}
+
+@supports ([color: red]) {
+  * { background: red; }
+}
+
+@supports ([[[[[{ --func(color: { red }) }]]]]]) {
+  * { background: red; }
+}
+@page :left {
+    background: black
+}
+
+@media(min-width: 0) {
+    background: white
+}
+
+@font-face {
+    family-name: "A;' /**/";
+}
+
+@viewport {
+    width: 110px;
+}
+
+@-ms-viewport {
+    width: 100px;
+}
+@charset "UTF-8";
+@page{ }
+@media screen {@content}
+
+@charset "UTF-8"
+@import"test.css"
+@-moz-document/* near */ /* filter */ url("example.com/{") /* a */ {}
+@supports (animation-name: test) {
+    @-custom-keyframe anim {
+        from {
+            color: black;
+        }
+        to {
+            color: white
+        }
+    }
+}
+
+@support selector(:focus-visible) {
+  a:focus-visible {
+    background: yellow;
+  }
+}
+a/**/
+{}
+:fullscreen {}
+/* a { color: black } */
+/**/
+/* */
+div {
+    /* inside */
+    color: black;
+    /* between */
+    border-radius: 3px / 7px
+    /* end */
+}
+/* b */
+
+a {
+    color: black;
+    /* c */
+}
+
+.in/**/side {
+  color: var/**/(--broken);
+  font-family: sans-serif,/**/serif;
+}
+:root {
+  --number: 1;
+  --unit: 100vw;
+  --color: #06c;
+
+  --function: calc(1 + 1);
+  --variable: var(--unit);
+
+  --string: 'single quoted string';
+  --string: "double quoted string";
+
+  --square-block: [1, 2, 3];
+  --round-block: (1, 2, 3);
+
+  --empty1: ;
+  --empty2: /**/;
+  --empty3: !important;
+  --empty4:/**/ !important;
+  --empty5:/**/ ;
+
+  --bracket-block: {1, 2, 3};
+  --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  --javascript: function(rule) { console.log(rule) };
+}
+
+:root{--a:1}
+
+.semicolon-less {--empty-end:/**/ }
+a {
+    color: black;
+    background: white;
+}
+a {
+    background: url("a).png");
+    background: url(a;a);
+    background: url(a/*);
+    background: \;a;
+}
+
+:not([foo=")"]) { }
+:not(div/*)*/) { }
+:not(:nth-child(2n of [foo=")"])) { }
+[foo=\"] { }
+[foo=\{] { }
+[foo=\(] { }
+[foo=yes\:\(it\'s\ work\)] { }
+
+\@noat { }
+
+h1\\{
+    color: \\;
+}
+
+[attr=;] { }
+
+.prop {
+    \62 olor: red
+}
+one: 1;
+
+a {
+    two: 2;
+    b {
+        three: 3;
+    }
+}
+a {
+    background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+    background-image: url("./image (1).jpg");
+    background-image: url( './image (1).jpg' );
+}
+a {
+    filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=2) progid:DXImageTransform.Microsoft.Wheel(duration=3);
+}
+a {
+    width: 1px!important;
+    color: black  !important ;
+}
+
+p {
+    prop: important;
+    color: red important;
+    margin: 10px      !      important;
+    padding: 20px     !  /* test */   important;
+    width: 100px ! /*! test */ important;
+    height: 100px /*! test */ important;
+    z-index: 1 ""! important;
+    padding: 1px/* sep */!important;
+    left: 10 !IMPORTANT;
+    right: 10 ! IMPORTANT;
+}
+a { @import "a.css" }
+{}
+a {
+    *color : black;
+    _background: white;
+    font-size/**/: big;
+    $(var)-size: 100%;
+}
+a::before {
+    content: ";'@ /**/\"";
+    content: '\'"\\';
+}
+a { color: a/* ; */ b  ; }
+a {
+    width: 10px;
+    margin: 0 @width;
+    @mixin mobile {
+        height: 100px;
+    }
+}
+a{color:black}
+
+a/* { } */ b {}
+
+a/* test */b {}
+a {;;
+    color: black;
+    ; ;
+}
+a {
+	color: black
+}

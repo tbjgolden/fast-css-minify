@@ -2,3 +2,4 @@ build
 compiled
 coverage
 dist
+src/__fixtures__

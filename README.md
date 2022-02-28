@@ -10,7 +10,7 @@ A minifier for people who don't use SASS / PostCSS.
 - [x] fastest afaik (faster than csso, cssnano)
 - [x] fully spec compliant, not just a cheeky regex
 - [x] far more readable than pure minified
-- [x] after gzip/brotli only 3% larger than csso
+- [x] after gzip/brotli only 0.5% larger than csso
 
 ## Quickfire examples
 
