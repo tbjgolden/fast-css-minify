@@ -60,6 +60,7 @@ module.exports = {
     'compiled/',
     'coverage/',
     'dist/',
+    '/test',
     'node_modules/',
     '/*.js',
     '/*.json'

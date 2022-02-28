@@ -6,8 +6,8 @@ import {
   consumeNumeric,
   consumeString,
   consumeUrl,
-  lexicalAnalysis
-} from './lexicalAnalysis'
+  toTokens
+} from './lexer'
 import fs from 'fs'
 import path from 'path'
 
@@ -229,9 +229,7 @@ test('consumeIdentLike', () => {
 
 test('old bugs', () => {
   expect(
-    lexicalAnalysis(
-      '.dropdown-item:hover{color:#1e2125;background-color:#e9ecef}'
-    )
+    toTokens('.dropdown-item:hover{color:#1e2125;background-color:#e9ecef}')
   ).toEqual([
     {
       type: '<delim-token>',
@@ -285,7 +283,7 @@ test('old bugs', () => {
       type: '<EOF-token>'
     }
   ])
-  expect(lexicalAnalysis('@media (1/2 < aspect-ratio < 1/1) { }')).toEqual([
+  expect(toTokens('@media (1/2 < aspect-ratio < 1/1) { }')).toEqual([
     {
       type: '<at-keyword-token>',
       value: 'media'
@@ -369,7 +367,7 @@ test('old bugs', () => {
   ])
 })
 
-test('lexicalAnalysis', () => {
+test('toTokens', () => {
   const input = fs.readFileSync(
     path.join(__dirname, '__fixtures__', 'bootstrap.css'),
     'utf8'
@@ -380,5 +378,5 @@ test('lexicalAnalysis', () => {
       'utf8'
     )
   )
-  expect(lexicalAnalysis(input)).toEqual(output)
+  expect(toTokens(input)).toEqual(output)
 })

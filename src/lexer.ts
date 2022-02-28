@@ -29,6 +29,7 @@ export type WhitespaceToken = {
 export type StringToken = {
   type: '<string-token>'
   value: string
+  raw: string
 }
 export type HashToken = {
   type: '<hash-token>'
@@ -112,12 +113,37 @@ const weirdNewlines = /(\u000D|\u000C|\u000D\u000A)/g
 const nullOrSurrogates = /[\u0000\uD800-\uDFFF]/g
 const commentRegex = /(\/\*)[\s\S]*?(\*\/)/g
 
-export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
+export const toTokens = (str: string, index = 0): Token[] => {
   // pre-processing
   str = str.replace(weirdNewlines, '\n').replace(nullOrSurrogates, '\uFFFD')
 
   // remove comments
   str = str.replace(commentRegex, '')
+
+  const errorMessage = (invalid: string, index: number) => {
+    const isAtStart = index <= 40
+    const isAtEnd = str.length - index <= 40
+
+    const excerpt = str.slice(
+      Math.max(0, index - 40),
+      Math.min(str.length, index + 40)
+    )
+
+    let prevNewLineIndex = -1
+    for (let i = 39; i >= 0; i--) {
+      if (excerpt.charCodeAt(i) === 10) {
+        prevNewLineIndex = i
+        break
+      }
+    }
+
+    return `Invalid ${invalid}:\n\n${isAtStart ? '' : '[...]\n'}${
+      excerpt.slice(0, prevNewLineIndex + 1) +
+      new Array(40 - prevNewLineIndex).fill('').join(' ') +
+      '↓\n' +
+      excerpt.slice(prevNewLineIndex + 1)
+    }${isAtEnd ? '' : '\n[...]'}`
+  }
 
   const tokens: Token[] = []
   for (; index < str.length; index += 1) {
@@ -134,12 +160,13 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
     } else if (code === 0x0022) {
       const result = consumeString(str, index)
       if (result === null) {
-        return null
+        throw new Error(errorMessage('string', index))
       }
       const [lastIndex, value] = result
       tokens.push({
         type: '<string-token>',
-        value
+        value,
+        raw: str.slice(index, lastIndex + 1)
       })
       index = lastIndex
     } else if (code === 0x0023) {
@@ -182,12 +209,13 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
     } else if (code === 0x0027) {
       const result = consumeString(str, index)
       if (result === null) {
-        return null
+        throw new Error(errorMessage('identlike', index))
       }
       const [lastIndex, value] = result
       tokens.push({
         type: '<string-token>',
-        value
+        value,
+        raw: str.slice(index, lastIndex + 1)
       })
       index = lastIndex
     } else if (code === 0x0028) {
@@ -201,7 +229,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
         if (nextCode >= 0x0030 && nextCode <= 0x0039) {
           const result = consumeNumeric(str, index + 1)
           if (result === null) {
-            return null
+            throw new Error(errorMessage('numeric', index + 1))
           }
           const [lastIndex, tokenTuple] = result
           if (tokenTuple[0] === '<dimension-token>') {
@@ -244,7 +272,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
         if (nextCode >= 0x0030 && nextCode <= 0x0039) {
           const result = consumeNumeric(str, index + 1)
           if (result === null) {
-            return null
+            throw new Error(errorMessage('numeric', index + 1))
           }
           const [lastIndex, tokenTuple] = result
           if (tokenTuple[0] === '<dimension-token>') {
@@ -308,7 +336,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
         if (nextCode >= 0x0030 && nextCode <= 0x0039) {
           const result = consumeNumeric(str, index + 1)
           if (result === null) {
-            return null
+            throw new Error(errorMessage('numeric', index + 1))
           }
           const [lastIndex, tokenTuple] = result
           if (tokenTuple[0] === '<dimension-token>') {
@@ -387,7 +415,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
     } else if (code === 0x005c) {
       const result = consumeEscape(str, index)
       if (result === null) {
-        return null
+        throw new Error(errorMessage('escape', index))
       }
       const [lastIndex, value] = result
       str = str.slice(0, index) + value + str.slice(lastIndex + 1)
@@ -401,7 +429,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
     } else if (code >= 0x0030 && code <= 0x0039) {
       const result = consumeNumeric(str, index)
       if (result === null) {
-        return null
+        throw new Error(errorMessage('numeric', index))
       }
       const [lastIndex, tokenTuple] = result
       if (tokenTuple[0] === '<dimension-token>') {
@@ -434,7 +462,7 @@ export const lexicalAnalysis = (str: string, index = 0): Token[] | null => {
     ) {
       const result = consumeIdentLike(str, index)
       if (result === null) {
-        return null
+        throw new Error(errorMessage('identlike', index))
       }
       const [lastIndex, value, type] = result
       tokens.push({
@@ -820,7 +848,7 @@ export const consumeIdentLike = (
         for (let offset = 2; lastIndex + offset < str.length; offset += 1) {
           const nextNextCode = str.charCodeAt(lastIndex + offset)
           if (nextNextCode === 0x0022 || nextNextCode === 0x0027) {
-            return [lastIndex, value.toLowerCase(), '<function-token>']
+            return [lastIndex + 1, value.toLowerCase(), '<function-token>']
           } else if (
             nextNextCode !== 0x0009 &&
             nextNextCode !== 0x0020 &&
